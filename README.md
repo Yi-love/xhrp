@@ -1,0 +1,2 @@
+# xhr-promise
+XMLHttpRequest promise
