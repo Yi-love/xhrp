@@ -252,8 +252,8 @@
 
 	function ajax(options){
 		//数据类型
-	    var dataType = options.dataType;
-	    if( dataType === 'jsonp' ) return jsonp(settings);
+	    var jsonp = options.jsonp;
+	    if( jsonp ) return jsonp(settings);
 
 		var settings = extend({}, options || {}) , urlAnchor;
 		//合并默认设置和用户的设置
