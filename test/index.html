@@ -1,68 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>xhr-promise</title>
+  <meta charset="UTF-8">
+  <title>xhr-promise</title>
 </head>
 <body>
-    <button id="send_get">send get</button>
-    <button id="send_post">send post</button>
-    <button id="send_ajax">send ajax</button>
-    <button id="send_jsonp">send jsonp</button>
-    <script src="../index.js"></script>
-    <script>
-        'use strict';
-        var sendGet = document.getElementById('send_get');
-        sendGet.addEventListener('click' , (e)=>{
-            e.preventDefault();
-            xhrp.get('http://127.0.0.1:8888/test')
-            .then((result)=>{
-                console.log(result);
-            }).catch((e)=>{
-                console.log(e);
-            });
-        });
+  <p>Please open Console.</p>
+  <h2>get</h2>
+  <button id="send_get">send get</button> <button id="send_get_abort">send get abort</button> <button id="send_get_timeout">send get timeout</button>
+  <h2>post</h2>
+  <button id="send_post">send post</button> <button id="send_post_abort">send post abort</button><button id="send_post_timeout">send post timeout</button>
+  <h2>ajax</h2>
+  <button id="send_ajax">send ajax</button> <button id="send_ajax_abort">send ajax abort</button> <button id="send_ajax_timeout">send ajax timeout</button>
+  <h2>jsonp</h2>
+  <button id="send_jsonp">send jsonp</button><button id="send_jsonp_abort">send jsonp abort</button><button id="send_jsonp_timeout">send jsonp timeout</button>
+  <script src="../index.js"></script>
+  <script>
+    'use strict';
+    var sendGet = document.getElementById('send_get');
+    sendGet.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.get('http://127.0.0.1:8888/testget')
+      .then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+    var sendGetAbort = document.getElementById('send_get_abort');
+    sendGetAbort.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      let promise = xhrp.get('http://127.0.0.1:8888/testget/abort');
+      promise.then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+      xhrp.abort(promise);
+    });
+    var sendGetTimeout = document.getElementById('send_get_timeout');
+    sendGetTimeout.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.get('http://127.0.0.1:8888/testget/timeout',{timeout:2000})
+      .then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
 
-        var sendPost = document.getElementById('send_post');
-        sendPost.addEventListener('click' , (e)=>{
-            e.preventDefault();
-            xhrp.post('http://127.0.0.1:8888/test',
-                {data:
-                    {a:67867,b:7898,
-                    c:'yuiuyiuyi',d:'hkhjk*hkjh&&&bgm<>'
-                },
-                timeout:4000
-            }).then((result)=>{
-                console.log(result);
-            }).catch((e)=>{
-                console.log(e);
-            });
-        });
-        var sendAjax = document.getElementById('send_ajax');
-        sendAjax.addEventListener('click' , (e)=>{
-            e.preventDefault();
-            let promise = xhrp.ajax({
-                url:'http://127.0.0.1:8888/test' ,
-                headers :{Accept:'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*'}
-            });
-            promise.then((result)=>{
-                console.log(result);
-            }).catch((e)=>{
-                console.log(e);
-            });
-            xhrp.abort(promise);
-        });
-        var sendJsonp = document.getElementById('send_jsonp');
-        sendJsonp.addEventListener('click' , (e)=>{
-            e.preventDefault();
-            let promise = xhrp.jsonp({url:'http://127.0.0.1:8888/test' ,timeout:4000});
-            promise.then((result)=>{
-                console.log(result);
-            }).catch((e)=>{
-                console.log(e);
-            });
-            xhrp.abort(promise);
-        });
+    var sendPost = document.getElementById('send_post');
+    sendPost.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.post('http://127.0.0.1:8888/testpost',{
+        data:
+        {
+          a:67867,b:7898,
+          c:'yuiuyiuyi',d:'hkhjk*hkjh&&&bgm<>'
+        }
+      }).then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+    var sendPostAbort = document.getElementById('send_post_abort');
+    sendPostAbort.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      let promise = xhrp.post('http://127.0.0.1:8888/testpost/abort',{
+        data:
+        {
+          a:12,b:7898,
+          c:'wews',d:'erte'
+        }
+      });
+      promise.then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+      xhrp.abort(promise);
+    });
+    var sendPostTimeout = document.getElementById('send_post_timeout');
+    sendPostTimeout.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.post('http://127.0.0.1:8888/testpost/timeout',{
+        data:
+        {
+          a:67867,b:23,
+          c:'dfgd',d:'hk<>'
+        },
+        timeout:4000
+      }).then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+
+    var sendAjax = document.getElementById('send_ajax');
+    sendAjax.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.ajax({
+        url:'http://127.0.0.1:8888/testajax' ,
+        headers :{Accept:'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*'}
+      }).then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+    var sendAjaxAbort = document.getElementById('send_ajax_abort');
+    sendAjaxAbort.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      let promise = xhrp.ajax({
+        url:'http://127.0.0.1:8888/testajax/abort'
+      });
+      promise.then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+      xhrp.abort(promise);
+    });
+    var sendAjaxTimeout = document.getElementById('send_ajax_timeout');
+    sendAjaxTimeout.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.ajax({
+        url:'http://127.0.0.1:8888/testajax/timeout' ,
+        timeout:4000
+      }).then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+
+    var sendJsonp = document.getElementById('send_jsonp');
+    sendJsonp.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.jsonp({url:'http://127.0.0.1:8888/testjsonp'})
+      .then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
+    var sendJsonpAbort = document.getElementById('send_jsonp_abort');
+    sendJsonpAbort.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      let promise = xhrp.jsonp({url:'http://127.0.0.1:8888/testjsonp/abort'});
+      promise.then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+      xhrp.abort(promise);
+    });
+    var sendJsonpTimeout = document.getElementById('send_jsonp_timeout');
+    sendJsonpTimeout.addEventListener('click' , (e)=>{
+      e.preventDefault();
+      xhrp.jsonp({url:'http://127.0.0.1:8888/testjsonp/timeout' ,timeout:4000
+      }).then((result)=>{
+        console.log(result);
+      }).catch((e)=>{
+        console.log(e);
+      });
+    });
     </script>
 </body>
 </html>
