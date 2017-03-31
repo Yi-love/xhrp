@@ -479,9 +479,7 @@ var _dom = __webpack_require__(0);
 var jsonpID = 0;
 var empty = function empty(callbackName) {
   return function () {
-    if (_dom.root[callbackName]) {
-      delete _dom.root[callbackName];
-    }
+    delete _dom.root[callbackName];
   };
 };
 var jsonpCallbackPrefix = 'xhrp_jsonp_';

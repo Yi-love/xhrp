@@ -15,7 +15,7 @@
         var sendGet = document.getElementById('send_get');
         sendGet.addEventListener('click' , (e)=>{
             e.preventDefault();
-            xhrp.get('http://127.0.0.1:8888/test'})
+            xhrp.get('http://127.0.0.1:8888/test')
             .then((result)=>{
                 console.log(result);
             }).catch((e)=>{
