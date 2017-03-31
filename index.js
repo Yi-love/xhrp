@@ -385,7 +385,7 @@ function createAjax(settings, map) {
   }
 
   //异步
-  settings.aync = settings.aync === undefined ? true : settings.aync;
+  settings.async = settings.async === undefined ? true : settings.async;
 
   //内容类型
   setHeader('Accept', '*/*');
@@ -436,7 +436,7 @@ function createXHRPromise(req, headers, settings, nativeSetHeader, map) {
       }
     };
     //打开请求
-    req.open(settings.type, settings.url, settings.aync, settings.user, settings.password);
+    req.open(settings.type, settings.url, settings.async, settings.user, settings.password);
 
     for (var name in headers) {
       nativeSetHeader.apply(req, headers[name]); //req请求参数
