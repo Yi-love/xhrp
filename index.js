@@ -202,8 +202,6 @@ function appendQuery(url, query) {
  * @return {[string]}             [序列化好的数据]
  */
 function param(obj, traditional) {
-  var _this = this;
-
   var params = [];
   //定义添加函数
   params.add = function (key, value) {
@@ -214,7 +212,7 @@ function param(obj, traditional) {
       value = ''; //为空
     }
     //以 '='链接key和value ，用encodeURIComponent()转义
-    _this.push((0, _dom.escape)(key) + '=' + (0, _dom.escape)(value));
+    this.push((0, _dom.escape)(key) + '=' + (0, _dom.escape)(value));
   };
   //序列化
   serialize(params, obj, traditional);
@@ -273,7 +271,7 @@ function forEach(elements, callback) {
  */
 function serialize(params, obj, traditional, scope) {
   var type = void 0;
-  var array = (0, _util.isArray)(obj); //数组 
+  var array = Array.isArray(obj); //数组 
   var hash = (0, _util.isPlainObject)(obj); //对象
 
   forEach(obj, function (key, value) {
@@ -431,17 +429,12 @@ function createXHRPromise(req, headers, settings, nativeSetHeader, map) {
     req.onreadystatechange = function () {
       if (req.readyState === 4) {
         end();
-        if (req.status === 200 && req.status < 300 || req.status === 304) {
-          return resolve(req.responseText, req.status);
+        if (req.status >= 200 && req.status < 300 || req.status == 304) {
+          return resolve(req.responseText);
         }
-        return reject(new Error('request error. statusText: ' + req.statusText), req.status, req, settings);
+        return reject([new Error('request error. abort or timeout could be make this.'), req, settings]);
       }
     };
-    req.onabort = function (err) {
-      end();
-      return reject(new Error('request abort. reason: ' + err), req, settings);
-    };
-
     //打开请求
     req.open(settings.type, settings.url, settings.aync, settings.user, settings.password);
 
@@ -452,7 +445,7 @@ function createXHRPromise(req, headers, settings, nativeSetHeader, map) {
     //设置请求超时
     if (settings.timeout > 0) {
       abortTimeout = setTimeout(function () {
-        req.abort('timeout ' + settings.timeout + 's');
+        req.abort();
       }, settings.timeout);
     }
 
@@ -484,8 +477,14 @@ var _serialize = __webpack_require__(2);
 var _dom = __webpack_require__(0);
 
 var jsonpID = 0;
-var empty = function empty() {};
-var jsonpCallbackPrefix = 'xhrp-jsonp-';
+var empty = function empty(callbackName) {
+  return function () {
+    if (_dom.root[callbackName]) {
+      delete _dom.root[callbackName];
+    }
+  };
+};
+var jsonpCallbackPrefix = 'xhrp_jsonp_';
 /**
  * [trigger 触发事件]
  * @param  {[type]} event [description]
@@ -508,8 +507,6 @@ function trigger(element, event) {
 }
 
 function createJsonp(settings, map) {
-  var _arguments = arguments;
-
   //没有传人ajax请求url
   if (!settings.url) {
     settings.url = _dom.originAnchor.href; //使用当前url
@@ -527,14 +524,19 @@ function createJsonp(settings, map) {
   }
 
   var jsonp = settings.jsonp;
+  if (++jsonpID === Infinity) {
+    jsonpID = 0;
+  }
   var callbackName = jsonpCallbackPrefix + ++jsonpID;
   var script = _dom.document.createElement('script');
+  var response = void 0;
+  var abortTimeout = void 0;
+  var isAbort = false;
   var abort = function abort() {
+    isAbort = true;
     return trigger(script, 'error');
   };
   var req = { jsonp: jsonp, abort: abort };
-  var response = void 0;
-  var abortTimeout = void 0;
   settings.url = (0, _serialize.appendQuery)((0, _serialize.appendQuery)(settings.url, jsonp + '=' + callbackName), '_=' + Date.now());
   //添加src并添加到head
   script.src = settings.url;
@@ -546,30 +548,35 @@ function createJsonp(settings, map) {
     e.stopPropagation();
     clearTimeout(abortTimeout);
     map.remove(settings.url);
+    if (_dom.root[callbackName]) {
+      if (!isAbort) {
+        delete _dom.root[callbackName];
+      } else {
+        _dom.root[callbackName] = empty(callbackName);
+      }
+    }
+    if (script) {
+      script.remove();
+    }
   };
   function loadCallback(resolve) {
     return function (e) {
       end(e);
-      delete _dom.root[callbackName];
-      script.remove();
       return resolve(response);
     };
   }
   function errorCallback(reject) {
     return function (e) {
       end(e);
-      _dom.root[callbackName] = empty;
-      script.parentNode.removeChild(script);
-      return reject('jsonp error. reason: ' + e, req, settings);
+      return reject([e instanceof Error ? e : new Error('jsonp error. abort or timeout could be make this.'), req, settings]);
     };
   }
   var promise = new Promise(function (resolve, reject) {
     script.onload = loadCallback(resolve);
     script.onerror = errorCallback(reject);
-
     //callback函数注册到window
     _dom.root[callbackName] = function () {
-      response = _arguments;
+      response = Array.prototype.slice.call(arguments);
     };
     //是否存在超时
     if (settings.timeout > 0) {
@@ -577,7 +584,9 @@ function createJsonp(settings, map) {
         req.abort();
       }, settings.timeout);
     }
-    _dom.head.appendChild(script);
+    if (script) {
+      _dom.head.appendChild(script);
+    }
   });
 
   map.add(settings.url, {
@@ -632,7 +641,7 @@ var baseSettings = {
   //数据需要被序列化
   processData: true,
   //对get请求数据进行缓存
-  cache: false
+  cache: true
 };
 
 var jsonpSettings = (0, _util.extend)({ jsonp: 'callback' }, baseSettings);
@@ -641,8 +650,18 @@ ajaxSettings.xhr = function () {
   return new _dom.XMLHttpRequest();
 };
 
-function jsonp(options) {
-  var settings = (0, _util.extend)({}, options || {});
+function normalizeArgs(url, options) {
+  options = options && (0, _util.isObject)(options) ? options : {};
+  if ((0, _util.isString)(url)) {
+    options.url = url;
+  } else if ((0, _util.isObject)(url)) {
+    options = url;
+  }
+  return options;
+}
+
+function jsonp(url, options) {
+  var settings = (0, _util.extend)({}, normalizeArgs(url, options));
   return (0, _jsonp.createJsonp)((0, _util.merge)(settings, jsonpSettings), requestMap);
 }
 
@@ -650,11 +669,13 @@ function ajax(options) {
   var settings = (0, _util.extend)({}, options || {});
   return (0, _ajax.createAjax)((0, _util.merge)(settings, ajaxSettings), requestMap);
 }
-function get(options) {
+function get(url, options) {
+  options = normalizeArgs(url, options);
   return ajax((0, _util.extend)(options, { type: 'GET' }));
 }
 
-function post(options) {
+function post(url, options) {
+  options = normalizeArgs(url, options);
   return ajax((0, _util.extend)(options, { type: 'POST' }));
 }
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>xhr-promise</title>
+</head>
+<body>
+    <button id="send_get">send get</button>
+    <button id="send_post">send post</button>
+    <button id="send_ajax">send ajax</button>
+    <button id="send_jsonp">send jsonp</button>
+    <script src="../index.js"></script>
+    <script>
+        'use strict';
+        var sendGet = document.getElementById('send_get');
+        sendGet.addEventListener('click' , (e)=>{
+            e.preventDefault();
+            xhrp.get('http://127.0.0.1:8888/test'})
+            .then((result)=>{
+                console.log(result);
+            }).catch((e)=>{
+                console.log(e);
+            });
+        });
+
+        var sendPost = document.getElementById('send_post');
+        sendPost.addEventListener('click' , (e)=>{
+            e.preventDefault();
+            xhrp.post('http://127.0.0.1:8888/test',
+                {data:
+                    {a:67867,b:7898,
+                    c:'yuiuyiuyi',d:'hkhjk*hkjh&&&bgm<>'
+                },
+                timeout:4000
+            }).then((result)=>{
+                console.log(result);
+            }).catch((e)=>{
+                console.log(e);
+            });
+        });
+        var sendAjax = document.getElementById('send_ajax');
+        sendAjax.addEventListener('click' , (e)=>{
+            e.preventDefault();
+            let promise = xhrp.ajax({
+                url:'http://127.0.0.1:8888/test' ,
+                headers :{Accept:'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*'}
+            });
+            promise.then((result)=>{
+                console.log(result);
+            }).catch((e)=>{
+                console.log(e);
+            });
+            xhrp.abort(promise);
+        });
+        var sendJsonp = document.getElementById('send_jsonp');
+        sendJsonp.addEventListener('click' , (e)=>{
+            e.preventDefault();
+            let promise = xhrp.jsonp({url:'http://127.0.0.1:8888/test' ,timeout:4000});
+            promise.then((result)=>{
+                console.log(result);
+            }).catch((e)=>{
+                console.log(e);
+            });
+            xhrp.abort(promise);
+        });
+    </script>
+</body>
+</html>

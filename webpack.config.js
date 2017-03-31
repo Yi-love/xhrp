@@ -2,6 +2,7 @@ module.exports = {
   entry:{
     index: './src/index.js'
   },
+  watch:true,
   module:{
     rules:[{
       test:/\.js/,

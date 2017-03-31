@@ -1,5 +1,5 @@
 'use strict';
-import {extend , merge} from './../lib/_util.js';
+import {extend , merge , isString , isObject } from './../lib/_util.js';
 import {createJsonp} from './../lib/jsonp.js';
 import {createAjax} from './../lib/ajax.js';
 import {abortXhr} from './../lib/abort.js';
@@ -25,7 +25,7 @@ let baseSettings = {
   //数据需要被序列化
   processData: true,
   //对get请求数据进行缓存
-  cache: false
+  cache: true
 };
 
 let jsonpSettings = extend({jsonp:'callback'} , baseSettings);
@@ -34,20 +34,32 @@ ajaxSettings.xhr = ()=>{
   return new XMLHttpRequest();
 };
 
-export function jsonp(options) {
-  let settings = extend({} , options || {});
+function normalizeArgs(url , options){
+  options = options && isObject(options) ? options : {};
+  if ( isString(url) ){
+    options.url = url;
+  }else if ( isObject(url) ) {
+    options = url;
+  }
+  return options;
+}
+
+export function jsonp(url , options) {
+  let settings = extend({} , normalizeArgs(url , options));
   return createJsonp(merge(settings, jsonpSettings) , requestMap);
 }
 
-export function ajax( options ){
+export function ajax(options){
   let settings = extend({} , options || {});
   return createAjax(merge(settings, ajaxSettings) , requestMap);
 }
-export function get( options ) {
+export function get(url , options) {
+  options = normalizeArgs(url , options);
   return ajax(extend(options , {type:'GET'}));
 }
 
-export function post( options ) {
+export function post(url , options) {
+  options = normalizeArgs(url , options);
   return ajax(extend(options , {type:'POST'}));
 }
 
