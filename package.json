@@ -1,7 +1,7 @@
 {
-  "name": "xhr-promise",
+  "name": "xhrp",
   "version": "1.1.0",
-  "description": "xmlhttprequest of promise",
+  "description": "XMLHttpRequest of promise and export jsonp",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +12,10 @@
   },
   "keywords": [
     "xmlhttprequest",
+    "jsonp",
+    "get",
+    "post",
+    "ajax",
     "promise"
   ],
   "author": "Yi-love",
