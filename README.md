@@ -12,7 +12,7 @@ XMLHttpRequest of promise and export jsonp. xhrp depend on original Promise.
 ```sh
   var xhrp = require('xhrp');
   //or
-  import xhrp from 'xhrp/src/index.js'
+  import * as xhrp from 'xhrp';
   //or browser
   <script src="./index.js"></script>
 ```
