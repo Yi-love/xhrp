@@ -35,7 +35,7 @@ xhrp.abort(promise);
 ```
 ### get(url,[options])
 ```js
-xhrp.get('http://127.0.0.1:8888/test'})
+xhrp.get('http://127.0.0.1:8888/test')
 .then((result)=>{
   console.log(result);
 }).catch((e)=>{
@@ -55,6 +55,25 @@ xhrp.post({
     console.log(e);
 });
 ```
+
+upload File:
+
+```js
+let formdata = new FormData();
+formdata.append('filename',File);
+xhrp.post({
+    url:'http://127.0.0.1:8888/test' ,
+    timeout:4000,
+    data: formdata
+}).then((result)=>{
+    console.log(result);
+}).catch((e)=>{
+    console.log(e);
+});
+```
+
+> if you want send `application/json` , you need set `contentType` and set `processData=false`.
+
 ### jsonp(url,[options])
 
 ```js
@@ -83,7 +102,7 @@ type :'GET',
 crossDomain: false, //ineffect of jsonp ,please set params
 //超时设置  默认不超时
 timeout: 0,
-//数据需要被序列化
+//数据需要被序列化,默认为true
 processData: true,
 //对get请求数据进行缓存
 cache: true,
@@ -95,6 +114,8 @@ async:'boolean',
 user:'string',
 //密码
 password:'string',
+//请求头数据类型
+contentType:'string',
 //数据
 data:'object',
 //设置请求头

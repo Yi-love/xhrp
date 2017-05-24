@@ -16,9 +16,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -359,8 +359,8 @@ function createAjax(settings, map) {
     settings.crossDomain = _dom.originAnchor.protocol + '//' + _dom.originAnchor.host !== urlAnchor.protocol + '//' + urlAnchor.host;
   }
 
-  //序列化数据
-  if (settings.processData) {
+  //序列化数据 , formData格式以外的才序列化
+  if (settings.processData && !(settings.data instanceof FormData)) {
     (0, _serialize.serializeData)(settings);
   }
 
@@ -385,13 +385,13 @@ function createAjax(settings, map) {
   }
 
   //异步
-  settings.async = settings.async === undefined ? true : settings.async;
+  settings.async = 'async' in settings ? settings.async : false;
 
   //内容类型
   setHeader('Accept', '*/*');
 
-  //不是get请求则添加请求头
-  if (settings.data && settings.type.toUpperCase() != 'GET') {
+  //不是get请求则添加请求头 , 文件上传不使用Content-type
+  if (settings.data && settings.type.toUpperCase() != 'GET' && !(settings.data instanceof FormData)) {
     setHeader('Content-Type', settings.contentType || 'application/x-www-form-urlencoded'); //post必须添加
   }
 
@@ -430,7 +430,8 @@ function createXHRPromise(req, headers, settings, nativeSetHeader, map) {
       if (req.readyState === 4) {
         end();
         if (req.status >= 200 && req.status < 300 || req.status == 304) {
-          return resolve(req.responseText);
+          var response = 'response' in req ? req.response : req.responseText;
+          return resolve(response);
         }
         return reject([new Error('request error. abort or timeout could be make this.'), req, settings]);
       }
