@@ -385,7 +385,7 @@ function createAjax(settings, map) {
   }
 
   //异步
-  settings.async = 'async' in settings ? settings.async : false;
+  settings.async = 'async' in settings ? settings.async : true;
 
   //内容类型
   setHeader('Accept', '*/*');

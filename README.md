@@ -1,5 +1,5 @@
 # xhrp
-XMLHttpRequest of promise and export jsonp. xhrp depend on original Promise.
+XMLHttpRequest of promise and export jsonp. xhrp depend on native Promise.
 
 ## npm
 
